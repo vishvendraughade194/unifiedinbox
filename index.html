@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified Inbox</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Platforms</h2>
+      <ul>
+        <li data-platform="all" class="active">All</li>
+        <li data-platform="gmail">📧 Gmail</li>
+        <li data-platform="whatsapp">💬 WhatsApp</li>
+        <li data-platform="telegram">📨 Telegram</li>
+        <li data-platform="instagram">📷 Instagram</li>
+        <li data-platform="facebook">📘 Facebook</li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <header>
+        <h1>Unified Inbox</h1>
+        <input type="text" id="search" placeholder="Search messages..." />
+      </header>
+      <section id="messages" class="messages">
+        <!-- Messages injected by JavaScript -->
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
