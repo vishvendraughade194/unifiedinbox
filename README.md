@@ -408,4 +408,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ by the Unified Inbox Team**
 
-*Transform your messaging experience with the power of unified communication.*
+*Transform your messaging experience with the power of unified communication.* .
