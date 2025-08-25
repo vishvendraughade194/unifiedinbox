@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕊️ Flying Kabootar Animation Demo</title>
+    <link rel="stylesheet" href="kabootar-animation.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .demo-header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .demo-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 10px 0;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .control-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .control-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-card h3 {
+            margin: 0 0 15px 0;
+            color: #ffd700;
+            font-size: 1.3rem;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn.secondary {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        
+        .btn.weather {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+        
+        .btn.platform {
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+            color: #333;
+        }
+        
+        .features-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .features-list h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .feature-item i {
+            margin-right: 15px;
+            font-size: 1.5rem;
+            color: #4ecdc4;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .instructions h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .keyboard-shortcut {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 0 5px;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 10000;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" id="statusIndicator">
+        🕊️ Kabootar Status: Active
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🕊️ Flying Kabootar Animation</h1>
+            <p>Experience the magic of animated kabootars flying across your screen!</p>
+        </div>
+
+        <div class="controls-grid">
+            <div class="control-card">
+                <h3>🎮 Basic Controls</h3>
+                <button class="btn" onclick="toggleAnimation()">Toggle Animation</button>
+                <button class="btn secondary" onclick="pauseAnimation()">Pause</button>
+                <button class="btn secondary" onclick="resumeAnimation()">Resume</button>
+            </div>
+
+            <div class="control-card">
+                <h3>🌤️ Weather Effects</h3>
+                <button class="btn weather" onclick="setWeather('rain')">🌧️ Rain</button>
+                <button class="btn weather" onclick="setWeather('snow')">❄️ Snow</button>
+                <button class="btn weather" onclick="setWeather('wind')">💨 Wind</button>
+                <button class="btn weather" onclick="setWeather('clear')">☀️ Clear</button>
+            </div>
+
+            <div class="control-card">
+                <h3>📱 Platform Animations</h3>
+                <button class="btn platform" onclick="animateForPlatform('telegram')">📨 Telegram</button>
+                <button class="btn platform" onclick="animateForPlatform('gmail')">📧 Gmail</button>
+                <button class="btn platform" onclick="animateForPlatform('whatsapp')">💬 WhatsApp</button>
+                <button class="btn platform" onclick="animateForPlatform('instagram')">📷 Instagram</button>
+                <button class="btn platform" onclick="animateForPlatform('twitter')">🐦 Twitter</button>
+            </div>
+
+            <div class="control-card">
+                <h3>🎉 Special Effects</h3>
+                <button class="btn" onclick="startCelebration()">🎉 Celebration</button>
+                <button class="btn secondary" onclick="deliverMessage()">📨 Deliver Message</button>
+                <button class="btn secondary" onclick="setLoading(true)">⏳ Loading</button>
+                <button class="btn secondary" onclick="setLoading(false)">✅ Done</button>
+            </div>
+        </div>
+
+        <div class="features-list">
+            <h2>✨ Features</h2>
+            <div class="feature-item">
+                <i>🕊️</i>
+                <span>3 animated kabootars with different flight patterns</span>
+            </div>
+            <div class="feature-item">
+                <i>🌅</i>
+                <span>Time-based themes (morning, afternoon, evening, night)</span>
+            </div>
+            <div class="feature-item">
+                <i>🌤️</i>
+                <span>Weather effects (rain, snow, wind)</span>
+            </div>
+            <div class="feature-item">
+                <i>📱</i>
+                <span>Platform-specific color animations</span>
+            </div>
+            <div class="feature-item">
+                <i>🎮</i>
+                <span>Interactive controls (hover to pause, click for effects)</span>
+            </div>
+            <div class="feature-item">
+                <i>⌨️</i>
+                <span>Keyboard shortcuts (Ctrl+K to toggle)</span>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎯 How to Use</h3>
+            <ul>
+                <li><strong>Hover</strong> over the kabootars to pause the animation</li>
+                <li><strong>Click</strong> anywhere to create special kabootar effects</li>
+                <li>Use <span class="keyboard-shortcut">Ctrl+K</span> to toggle the entire animation</li>
+                <li>Try different weather effects and platform animations</li>
+                <li>Watch for automatic theme changes based on time of day</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="kabootar-animation.js"></script>
+    <script>
+        // Demo control functions
+        function toggleAnimation() {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.toggleAnimation();
+                updateStatus();
+            }
+        }
+
+        function pauseAnimation() {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.pauseAnimation();
+                updateStatus('Paused');
+            }
+        }
+
+        function resumeAnimation() {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.resumeAnimation();
+                updateStatus('Active');
+            }
+        }
+
+        function setWeather(weather) {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.setWeatherEffect(weather);
+                updateStatus(`Weather: ${weather}`);
+            }
+        }
+
+        function animateForPlatform(platform) {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.animateForPlatform(platform);
+                updateStatus(`Platform: ${platform}`);
+            }
+        }
+
+        function startCelebration() {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.startCelebration();
+                updateStatus('🎉 Celebrating!');
+            }
+        }
+
+        function deliverMessage() {
+            if (window.kabootarAnimation) {
+                const messages = [
+                    "Hello from the kabootar! 🕊️",
+                    "Message delivered successfully! ✨",
+                    "Flying high with your messages! 🚀",
+                    "Greetings from the sky! 🌤️"
+                ];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                window.kabootarAnimation.deliverMessage(randomMessage, 'demo');
+                updateStatus('📨 Delivering message...');
+            }
+        }
+
+        function setLoading(isLoading) {
+            if (window.kabootarAnimation) {
+                window.kabootarAnimation.setLoading(isLoading);
+                updateStatus(isLoading ? '⏳ Loading...' : '✅ Done!');
+            }
+        }
+
+        function updateStatus(message) {
+            const indicator = document.getElementById('statusIndicator');
+            if (indicator) {
+                indicator.innerHTML = `🕊️ ${message}`;
+                setTimeout(() => {
+                    indicator.innerHTML = '🕊️ Kabootar Status: Active';
+                }, 3000);
+            }
+        }
+
+        // Auto-demo effects
+        setInterval(() => {
+            if (window.kabootarAnimation && Math.random() < 0.1) {
+                const effects = [
+                    () => animateForPlatform(['telegram', 'gmail', 'whatsapp', 'instagram', 'twitter'][Math.floor(Math.random() * 5)]),
+                    () => setWeather(['rain', 'snow', 'wind', 'clear'][Math.floor(Math.random() * 3)]),
+                    () => deliverMessage()
+                ];
+                effects[Math.floor(Math.random() * effects.length)]();
+            }
+        }, 15000);
+
+        console.log('🕊️ Kabootar Demo loaded! Try all the interactive features!');
+    </script>
+</body>
+</html>

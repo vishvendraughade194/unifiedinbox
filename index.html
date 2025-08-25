@@ -3,35 +3,761 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unified Inbox</title>
+  <title>Unified Inbox - All Your Messages in One Place</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.0/chart.min.js" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
+  <div class="app-container" data-theme="auto">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <h2>Platforms</h2>
-      <ul>
-        <li data-platform="all" class="active">All</li>
-        <li data-platform="gmail">📧 Gmail</li>
-        <li data-platform="whatsapp">💬 WhatsApp</li>
-        <li data-platform="telegram">📨 Telegram</li>
-        <li data-platform="instagram">📷 Instagram</li>
-        <li data-platform="facebook">📘 Facebook</li>
-      </ul>
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-inbox"></i>
+          <span>Unified Inbox</span>
+        </div>
+        <div class="header-actions">
+          <button id="btnThemeToggle" class="btn-icon" title="Toggle Theme">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button id="btnSettings" class="btn-icon" title="Settings">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="platform-filters">
+          <h3>Platforms</h3>
+          <ul class="platform-list">
+            <li data-platform="all" class="platform-item active">
+              <i class="fas fa-globe"></i>
+              <span>All Messages</span>
+              <span class="message-count" id="count-all">0</span>
+            </li>
+            <li data-platform="gmail" class="platform-item">
+              <i class="fas fa-envelope"></i>
+              <span>Gmail</span>
+              <span class="message-count" id="count-gmail">0</span>
+            </li>
+            <li data-platform="whatsapp" class="platform-item">
+              <i class="fab fa-whatsapp"></i>
+              <span>WhatsApp</span>
+              <span class="message-count" id="count-whatsapp">0</span>
+            </li>
+            <li data-platform="telegram" class="platform-item">
+              <i class="fab fa-telegram-plane"></i>
+              <span>Telegram</span>
+              <span class="message-count" id="count-telegram">0</span>
+            </li>
+            <li data-platform="instagram" class="platform-item">
+              <i class="fab fa-instagram"></i>
+              <span>Instagram</span>
+              <span class="message-count" id="count-instagram">0</span>
+            </li>
+            <li data-platform="twitter" class="platform-item">
+              <i class="fab fa-twitter"></i>
+              <span>X (Twitter)</span>
+              <span class="message-count" id="count-twitter">0</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="quick-actions">
+          <button id="btnCompose" class="btn btn-primary btn-compose">
+            <i class="fas fa-plus"></i>
+            Compose
+          </button>
+          <button id="btnRefresh" class="btn btn-secondary">
+            <i class="fas fa-sync-alt"></i>
+            Refresh
+          </button>
+          <button id="btnAnalytics" class="btn btn-secondary">
+            <i class="fas fa-chart-line"></i>
+            Analytics
+          </button>
+        </div>
+
+        <div class="smart-features">
+          <h3>Smart Features</h3>
+          <div class="feature-list">
+            <div class="feature-item" id="aiCategorization">
+              <i class="fas fa-brain"></i>
+              <span>AI Categorization</span>
+              <div class="feature-toggle">
+                <input type="checkbox" id="aiCategorizationToggle" />
+                <label for="aiCategorizationToggle"></label>
+              </div>
+            </div>
+            <div class="feature-item" id="smartReplies">
+              <i class="fas fa-magic"></i>
+              <span>Smart Replies</span>
+              <div class="feature-toggle">
+                <input type="checkbox" id="smartRepliesToggle" />
+                <label for="smartRepliesToggle"></label>
+              </div>
+            </div>
+            <div class="feature-item" id="autoScheduling">
+              <i class="fas fa-clock"></i>
+              <span>Auto Scheduling</span>
+              <div class="feature-toggle">
+                <input type="checkbox" id="autoSchedulingToggle" />
+                <label for="autoSchedulingToggle"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-indicators">
+          <h3>Connection Status</h3>
+          <div class="status-list">
+            <div class="status-item" id="status-gmail">
+              <span class="status-dot"></span>
+              <span>Gmail</span>
+            </div>
+            <div class="status-item" id="status-whatsapp">
+              <span class="status-dot"></span>
+              <span>WhatsApp</span>
+            </div>
+            <div class="status-item" id="status-telegram">
+              <span class="status-dot"></span>
+              <span>Telegram</span>
+            </div>
+            <div class="status-item" id="status-instagram">
+              <span class="status-dot"></span>
+              <span>Instagram</span>
+            </div>
+            <div class="status-item" id="status-twitter">
+              <span class="status-dot"></span>
+              <span>X (Twitter)</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </aside>
 
-    <main class="main">
-      <header>
-        <h1>Unified Inbox</h1>
-        <input type="text" id="search" placeholder="Search messages..." />
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <h1 id="currentView">All Messages</h1>
+          <p id="messageCount">0 messages</p>
+        </div>
+        <div class="header-right">
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <input type="text" id="searchInput" placeholder="Search messages..." />
+              <button id="btnAdvancedSearch" class="btn-icon" title="Advanced Search">
+                <i class="fas fa-filter"></i>
+              </button>
+              <button id="btnSearch" class="btn-icon">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+            <div class="search-filters" id="searchFilters" style="display: none;">
+              <div class="filter-group">
+                <label>Date Range:</label>
+                <select id="dateFilter">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Platform:</label>
+                <select id="platformFilter">
+                  <option value="all">All Platforms</option>
+                  <option value="gmail">Gmail</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="twitter">X (Twitter)</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Status:</label>
+                <select id="statusFilter">
+                  <option value="all">All Status</option>
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button id="btnViewToggle" class="btn btn-secondary" title="Toggle View">
+            <i class="fas fa-th-large"></i>
+          </button>
+          <button id="btnNotifications" class="btn btn-secondary" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge">0</span>
+          </button>
+        </div>
       </header>
-      <section id="messages" class="messages">
-        <!-- Messages injected by JavaScript -->
-      </section>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Conversations List -->
+        <div class="conversations-panel" id="conversationsPanel">
+          <div class="conversations-header">
+            <h3>Conversations</h3>
+            <div class="conversation-actions">
+              <button id="btnNewConversation" class="btn btn-sm btn-primary" title="New Conversation">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button id="btnConversationFilter" class="btn btn-sm btn-secondary" title="Filter Conversations">
+                <i class="fas fa-filter"></i>
+              </button>
+            </div>
+          </div>
+          <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be populated here -->
+          </div>
+        </div>
+
+        <!-- Messages Panel -->
+        <div class="messages-panel" id="messagesPanel">
+          <div class="messages-header">
+            <div class="conversation-info" id="conversationInfo">
+              <h3>Select a conversation</h3>
+              <p>Choose a conversation from the left panel to view messages</p>
+            </div>
+            <div class="conversation-actions" id="conversationActions" style="display: none;">
+              <button id="btnMarkRead" class="btn btn-sm btn-secondary">
+                <i class="fas fa-check-double"></i>
+                Mark Read
+              </button>
+              <button id="btnArchive" class="btn btn-sm btn-secondary">
+                <i class="fas fa-archive"></i>
+                Archive
+              </button>
+              <button id="btnSchedule" class="btn btn-sm btn-secondary">
+                <i class="fas fa-clock"></i>
+                Schedule
+              </button>
+              <button id="btnDelete" class="btn btn-sm btn-danger">
+                <i class="fas fa-trash"></i>
+                Delete
+              </button>
+            </div>
+          </div>
+          
+          <div class="messages-container" id="messagesContainer">
+            <div class="empty-state" id="emptyState">
+              <i class="fas fa-comments"></i>
+              <h3>No messages yet</h3>
+              <p>Start a conversation or wait for incoming messages</p>
+            </div>
+          </div>
+
+          <!-- Message Composition -->
+          <div class="message-compose" id="messageCompose" style="display: none;">
+            <div class="compose-header">
+              <span>Reply to conversation</span>
+              <div class="compose-actions-header">
+                <button id="btnScheduleReply" class="btn btn-sm btn-secondary" title="Schedule Reply">
+                  <i class="fas fa-clock"></i>
+                  Schedule
+                </button>
+                <button id="btnCloseCompose" class="btn-icon" title="Close Compose">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="compose-content">
+              <div class="compose-input">
+                <textarea id="composeText" placeholder="Type your message..." rows="3"></textarea>
+                <div class="compose-actions">
+                  <button id="btnAttach" class="btn-icon" title="Attach file">
+                    <i class="fas fa-paperclip"></i>
+                  </button>
+                  <button id="btnEmoji" class="btn-icon" title="Add emoji">
+                    <i class="fas fa-smile"></i>
+                  </button>
+                  <button id="btnAI" class="btn-icon" title="AI Assistant">
+                    <i class="fas fa-magic"></i>
+                  </button>
+                  <button id="btnSend" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
+
+    <!-- Analytics Dashboard Modal -->
+    <div class="modal" id="analyticsModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Analytics Dashboard</h3>
+          <button class="modal-close" id="closeAnalyticsModal" title="Close Modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h4>Message Volume</h4>
+              <canvas id="messageVolumeChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h4>Platform Distribution</h4>
+              <canvas id="platformDistributionChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h4>Response Times</h4>
+              <canvas id="responseTimeChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h4>Engagement Metrics</h4>
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <span class="metric-value" id="avgResponseTime">2.3s</span>
+                  <span class="metric-label">Avg Response</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-value" id="totalMessages">1,247</span>
+                  <span class="metric-label">Total Messages</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-value" id="activeConversations">89</span>
+                  <span class="metric-label">Active Chats</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-value" id="satisfactionScore">4.8</span>
+                  <span class="metric-label">Satisfaction</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compose Modal -->
+    <div class="modal" id="composeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Compose New Message</h3>
+          <button class="modal-close" id="closeComposeModal" title="Close Modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="composePlatform">Platform</label>
+            <select id="composePlatform" required>
+              <option value="">Select platform</option>
+              <option value="gmail">Gmail</option>
+              <option value="telegram">Telegram</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="instagram">Instagram</option>
+              <option value="twitter">X (Twitter)</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="gmailFields" style="display: none;">
+            <label for="composeSubject">Subject</label>
+            <input type="text" id="composeSubject" placeholder="Email subject" />
+          </div>
+          
+          <div class="form-group">
+            <label for="composeRecipient">Recipient</label>
+            <input type="text" id="composeRecipient" placeholder="Recipient ID or email" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="composeMessage">Message</label>
+            <textarea id="composeMessage" rows="5" placeholder="Type your message..." required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="composeAttachments">Attachments</label>
+            <input type="file" id="composeAttachments" multiple />
+          </div>
+
+          <div class="form-group">
+            <label for="composeSchedule">Schedule Message</label>
+            <div class="schedule-options">
+              <input type="checkbox" id="scheduleMessage" />
+              <label for="scheduleMessage">Schedule for later</label>
+              <input type="datetime-local" id="composeSchedule" style="display: none;" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelCompose">Cancel</button>
+          <button class="btn btn-primary" id="sendCompose">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Assistant Modal -->
+    <div class="modal" id="aiAssistantModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>AI Assistant</h3>
+          <button class="modal-close" id="closeAIModal" title="Close Modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="ai-features">
+            <div class="ai-feature">
+              <h4>Smart Reply Suggestions</h4>
+              <div class="suggestion-buttons">
+                <button class="btn btn-sm btn-secondary suggestion-btn">Thank you!</button>
+                <button class="btn btn-sm btn-secondary suggestion-btn">I'll get back to you soon</button>
+                <button class="btn btn-sm btn-secondary suggestion-btn">That sounds great!</button>
+                <button class="btn btn-sm btn-secondary suggestion-btn">Let me check and confirm</button>
+              </div>
+            </div>
+            <div class="ai-feature">
+              <h4>Message Tone</h4>
+              <div class="tone-selector">
+                <button class="tone-btn active" data-tone="professional">Professional</button>
+                <button class="tone-btn" data-tone="friendly">Friendly</button>
+                <button class="tone-btn" data-tone="casual">Casual</button>
+                <button class="tone-btn" data-tone="formal">Formal</button>
+              </div>
+            </div>
+            <div class="ai-feature">
+              <h4>Content Enhancement</h4>
+              <button id="btnEnhanceMessage" class="btn btn-primary">
+                <i class="fas fa-magic"></i>
+                Enhance Current Message
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Settings</h3>
+          <button class="modal-close" id="closeSettingsModal" title="Close Modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-tabs">
+            <div class="tab-buttons">
+              <button class="tab-btn active" data-tab="platforms">Platforms</button>
+              <button class="tab-btn" data-tab="preferences">Preferences</button>
+              <button class="tab-btn" data-tab="ai">AI Features</button>
+              <button class="tab-btn" data-tab="notifications">Notifications</button>
+              <button class="tab-btn" data-tab="shortcuts">Keyboard Shortcuts</button>
+            </div>
+            
+            <div class="tab-content">
+              <!-- Platforms Tab -->
+              <div class="tab-pane active" id="platforms-tab">
+                <div class="platform-settings">
+                  <div class="platform-setting" data-platform="gmail">
+                    <div class="platform-info">
+                      <i class="fas fa-envelope"></i>
+                      <span>Gmail</span>
+                    </div>
+                    <div class="platform-status">
+                      <span class="status-badge" id="gmail-status">Not Configured</span>
+                      <button class="btn btn-sm btn-primary" id="configure-gmail">Configure</button>
+                    </div>
+                  </div>
+                  
+                  <div class="platform-setting" data-platform="telegram">
+                    <div class="platform-info">
+                      <i class="fab fa-telegram-plane"></i>
+                      <span>Telegram</span>
+                    </div>
+                    <div class="platform-status">
+                      <span class="status-badge" id="telegram-status">Not Configured</span>
+                      <button class="btn btn-sm btn-primary" id="configure-telegram">Configure</button>
+                    </div>
+                  </div>
+                  
+                  <div class="platform-setting" data-platform="whatsapp">
+                    <div class="platform-info">
+                      <i class="fab fa-whatsapp"></i>
+                      <span>WhatsApp</span>
+                    </div>
+                    <div class="platform-status">
+                      <span class="status-badge" id="whatsapp-status">Not Configured</span>
+                      <button class="btn btn-sm btn-primary" id="configure-whatsapp">Configure</button>
+                    </div>
+                  </div>
+                  
+                  <div class="platform-setting" data-platform="instagram">
+                    <div class="platform-info">
+                      <i class="fab fa-instagram"></i>
+                      <span>Instagram</span>
+                    </div>
+                    <div class="platform-status">
+                      <span class="status-badge" id="instagram-status">Not Configured</span>
+                      <button class="btn btn-sm btn-primary" id="configure-instagram">Configure</button>
+                    </div>
+                  </div>
+                  
+                  <div class="platform-setting" data-platform="twitter">
+                    <div class="platform-info">
+                      <i class="fab fa-twitter"></i>
+                      <span>X (Twitter)</span>
+                    </div>
+                    <div class="platform-status">
+                      <span class="status-badge" id="twitter-status">Not Configured</span>
+                      <button class="btn btn-sm btn-primary" id="configure-twitter">Configure</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Preferences Tab -->
+              <div class="tab-pane" id="preferences-tab">
+                <div class="form-group">
+                  <label>Theme</label>
+                  <div class="theme-options">
+                    <label class="theme-option">
+                      <input type="radio" name="theme" value="light" />
+                      <span class="theme-preview light">Light</span>
+                    </label>
+                    <label class="theme-option">
+                      <input type="radio" name="theme" value="dark" />
+                      <span class="theme-preview dark">Dark</span>
+                    </label>
+                    <label class="theme-option">
+                      <input type="radio" name="theme" value="auto" checked />
+                      <span class="theme-preview auto">Auto</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="autoRefresh" />
+                    Auto-refresh messages every 30 seconds
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="compactMode" />
+                    Enable compact mode
+                  </label>
+                </div>
+              </div>
+              
+              <!-- AI Features Tab -->
+              <div class="tab-pane" id="ai-tab">
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="aiCategorization" />
+                    Enable AI-powered message categorization
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="smartReplies" />
+                    Enable smart reply suggestions
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="autoScheduling" />
+                    Enable intelligent message scheduling
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="sentimentAnalysis" />
+                    Enable sentiment analysis
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Notifications Tab -->
+              <div class="tab-pane" id="notifications-tab">
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="notifications" />
+                    Enable desktop notifications
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="soundAlerts" />
+                    Enable sound alerts for new messages
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="emailDigest" />
+                    Send daily email digest
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Keyboard Shortcuts Tab -->
+              <div class="tab-pane" id="shortcuts-tab">
+                <div class="shortcuts-list">
+                  <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd + N</kbd>
+                    <span>New conversation</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd + F</kbd>
+                    <span>Search messages</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd + R</kbd>
+                    <span>Refresh messages</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <kbd>Ctrl/Cmd + ,</kbd>
+                    <span>Open settings</span>
+                  </div>
+                  <div class="shortcut-item">
+                    <kbd>Esc</kbd>
+                    <span>Close modals</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelSettings">Cancel</button>
+          <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Loading...</span>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div class="shortcuts-help" id="shortcutsHelp" style="display: none;">
+      <div class="shortcuts-content">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="shortcuts-grid">
+          <div class="shortcut-item">
+            <kbd>Ctrl/Cmd + N</kbd>
+            <span>New conversation</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>Ctrl/Cmd + F</kbd>
+            <span>Search messages</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>Ctrl/Cmd + R</kbd>
+            <span>Refresh messages</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>Ctrl/Cmd + ,</kbd>
+            <span>Open settings</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd>Esc</kbd>
+            <span>Close modals</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="closeShortcutsHelp">Got it!</button>
+      </div>
+    </div>
   </div>
 
+  <!-- Templates -->
+  <template id="conversationTemplate">
+    <div class="conversation-item" data-conversation-id="">
+      <div class="conversation-avatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="conversation-content">
+        <div class="conversation-header">
+          <h4 class="conversation-title"></h4>
+          <span class="conversation-time"></span>
+        </div>
+        <p class="conversation-preview"></p>
+        <div class="conversation-meta">
+          <span class="platform-badge"></span>
+          <span class="message-count"></span>
+          <span class="ai-category" style="display: none;"></span>
+        </div>
+      </div>
+      <div class="conversation-status">
+        <span class="unread-indicator"></span>
+        <span class="typing-indicator" style="display: none;">
+          <i class="fas fa-circle"></i>
+          <i class="fas fa-circle"></i>
+          <i class="fas fa-circle"></i>
+        </span>
+      </div>
+    </div>
+  </template>
+
+  <template id="messageTemplate">
+    <div class="message-item" data-message-id="">
+      <div class="message-avatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender"></span>
+          <span class="message-time"></span>
+          <span class="platform-badge"></span>
+          <div class="message-status">
+            <span class="read-receipt" style="display: none;">
+              <i class="fas fa-check-double"></i>
+            </span>
+          </div>
+        </div>
+        <div class="message-body">
+          <div class="message-text"></div>
+          <div class="message-attachments"></div>
+          <div class="message-reactions" style="display: none;">
+            <button class="reaction-btn" data-reaction="👍">👍</button>
+            <button class="reaction-btn" data-reaction="❤️">❤️</button>
+            <button class="reaction-btn" data-reaction="😊">😊</button>
+            <button class="reaction-btn" data-reaction="👏">👏</button>
+          </div>
+        </div>
+        <div class="message-actions">
+          <button class="btn-icon btn-reply" title="Reply">
+            <i class="fas fa-reply"></i>
+          </button>
+          <button class="btn-icon btn-forward" title="Forward">
+            <i class="fas fa-share"></i>
+          </button>
+          <button class="btn-icon btn-react" title="React">
+            <i class="fas fa-smile"></i>
+          </button>
+          <button class="btn-icon btn-delete" title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.0/chart.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

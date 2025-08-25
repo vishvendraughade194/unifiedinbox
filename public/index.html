@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified Messaging Dashboard v2.0 - AI-Powered</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/compromise@14.10.0/builds/compromise.min.js"></script>
+  <link rel="stylesheet" href="ai-dashboard.css" />
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-robot"></i> Welcome to Unified Inbox AI</h2>
+        <span class="close">&times;</span>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form">
+        <h3>Sign In</h3>
+        <div class="form-group">
+          <input type="email" id="loginEmail" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="loginPassword" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+          <div class="two-factor-auth">
+            <input type="text" id="login2FA" placeholder="2FA Code (if enabled)" maxlength="6">
+            <button type="button" id="generate2FA" class="btn btn-secondary btn-sm">Generate</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Sign Up</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form hidden">
+        <h3>Create Account</h3>
+        <div class="form-group">
+          <input type="text" id="registerName" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+          <input type="email" id="registerEmail" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="registerPassword" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="registerConfirmPassword" placeholder="Confirm Password" required>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable2FA" required>
+            <span class="checkmark"></span>
+            Enable Two-Factor Authentication
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+        <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div id="dashboard" class="dashboard hidden">
+    <div class="container">
+      <!-- Enhanced Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2><i class="fas fa-robot"></i> Unified Inbox AI</h2>
+          <div class="user-info">
+            <span id="userName">User</span>
+            <div class="user-avatar" id="userAvatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <button id="logoutBtn" class="btn-logout" title="Logout" aria-label="Logout">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Assistant -->
+        <div class="ai-assistant-section">
+          <h3><i class="fas fa-magic"></i> AI Assistant</h3>
+          <div class="ai-status">
+            <span class="ai-indicator active"></span>
+            <span>AI Active</span>
+          </div>
+          <button id="aiChatBtn" class="btn btn-ai">
+            <i class="fas fa-comments"></i> Chat with AI
+          </button>
+        </div>
+
+        <!-- Platform Connections -->
+        <div class="platforms-section">
+          <h3><i class="fas fa-plug"></i> Platforms</h3>
+          <div id="platformsList" class="platforms-list">
+            <!-- Platforms will be populated by JavaScript -->
+          </div>
+          <button id="connectPlatformBtn" class="btn btn-secondary btn-sm">
+            <i class="fas fa-plus"></i> Connect Platform
+          </button>
+        </div>
+
+        <!-- Smart Filters -->
+        <div class="filters-section">
+          <h3><i class="fas fa-filter"></i> Smart Filters</h3>
+          <ul class="filter-list">
+            <li data-filter="all" class="active"><i class="fas fa-globe"></i> All Messages</li>
+            <li data-filter="unread"><i class="fas fa-envelope"></i> Unread</li>
+            <li data-filter="important"><i class="fas fa-star"></i> Important</li>
+            <li data-filter="urgent"><i class="fas fa-exclamation-triangle"></i> Urgent</li>
+            <li data-filter="archived"><i class="fas fa-archive"></i> Archived</li>
+            <li data-filter="ai-categorized"><i class="fas fa-tags"></i> AI Categorized</li>
+          </ul>
+        </div>
+
+        <!-- Team Collaboration -->
+        <div class="team-section">
+          <h3><i class="fas fa-users"></i> Team</h3>
+          <div id="teamMembers" class="team-members">
+            <!-- Team members will be populated by JavaScript -->
+          </div>
+          <button id="inviteTeamBtn" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user-plus"></i> Invite Member
+          </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+          <button id="scheduleMessageBtn" class="btn btn-secondary btn-sm">
+            <i class="fas fa-clock"></i> Schedule Message
+          </button>
+          <button id="voiceMessageBtn" class="btn btn-secondary btn-sm">
+            <i class="fas fa-microphone"></i> Voice Message
+          </button>
+          <button id="bulkActionBtn" class="btn btn-secondary btn-sm">
+            <i class="fas fa-tasks"></i> Bulk Actions
+          </button>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+          <h3><i class="fas fa-chart-line"></i> Overview</h3>
+          <div id="statsOverview" class="stats-grid">
+            <!-- Stats will be populated by JavaScript -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main">
+        <!-- Enhanced Header -->
+        <header class="main-header">
+          <div class="header-left">
+            <h1 id="currentFilter">All Messages</h1>
+            <div class="breadcrumb">
+              <span id="messageCount">0 messages</span>
+              <span class="ai-insights" id="aiInsights">
+                <i class="fas fa-lightbulb"></i> AI Insights Available
+              </span>
+            </div>
+          </div>
+          
+          <div class="header-right">
+            <div class="search-container">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchInput" placeholder="Search messages with AI..." />
+              <button id="aiSearchBtn" class="btn-ai-search" title="AI-Powered Search">
+                <i class="fas fa-magic"></i>
+              </button>
+            </div>
+            
+            <button id="composeBtn" class="btn btn-primary">
+              <i class="fas fa-plus"></i> Compose
+            </button>
+            
+            <div class="notifications">
+              <i class="fas fa-bell" id="notificationsIcon"></i>
+              <span class="notification-badge" id="notificationCount">0</span>
+            </div>
+
+            <div class="theme-toggle">
+              <button id="themeToggle" class="btn-icon" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- AI Analytics Dashboard -->
+        <section id="analyticsDashboard" class="analytics-dashboard">
+          <div class="analytics-header">
+            <h2><i class="fas fa-chart-bar"></i> AI Analytics Dashboard</h2>
+            <div class="analytics-controls">
+              <select id="timeRange" class="select-control" title="Select time range for analytics" aria-label="Select time range for analytics">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+              </select>
+              <button id="refreshAnalytics" class="btn btn-secondary btn-sm">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+          </div>
+          
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h3>Message Volume</h3>
+              <canvas id="messageVolumeChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h3>Platform Distribution</h3>
+              <canvas id="platformDistributionChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h3>Response Time</h3>
+              <canvas id="responseTimeChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h3>AI Sentiment Analysis</h3>
+              <canvas id="sentimentChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Intelligence Dashboard -->
+        <section id="aiDashboard" class="ai-dashboard">
+          <div class="ai-dashboard-header">
+            <h2><i class="fas fa-brain"></i> AI Intelligence Dashboard</h2>
+            <div class="ai-dashboard-nav">
+              <button id="ai-overview-btn" class="ai-nav-btn active" data-view="overview" title="AI Overview Dashboard" aria-label="AI Overview Dashboard">
+                <i class="fas fa-chart-pie"></i> Overview
+              </button>
+              <button id="ai-categories-btn" class="ai-nav-btn" data-view="categories" title="Message Categories" aria-label="Message Categories">
+                <i class="fas fa-tags"></i> Categories
+              </button>
+              <button id="ai-suggestions-btn" class="ai-nav-btn" data-view="suggestions" title="Smart Reply Suggestions" aria-label="Smart Reply Suggestions">
+                <i class="fas fa-lightbulb"></i> Smart Replies
+              </button>
+            </div>
+          </div>
+          
+          <div id="ai-dashboard-container">
+            <!-- AI Dashboard content will be populated by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Messages Container -->
+        <section id="messagesContainer" class="messages-container">
+          <!-- Messages will be populated by JavaScript -->
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+          <!-- Pagination will be populated by JavaScript -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- AI Chat Modal -->
+  <div id="aiChatModal" class="modal">
+    <div class="modal-content ai-chat-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-robot"></i> AI Assistant Chat</h2>
+        <span class="close">&times;</span>
+      </div>
+      
+      <div class="ai-chat-container">
+        <div class="ai-chat-messages" id="aiChatMessages">
+          <div class="ai-message">
+            <div class="ai-avatar">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+              <p>Hello! I'm your AI assistant. I can help you with:</p>
+              <ul>
+                <li>Message categorization and prioritization</li>
+                <li>Smart reply suggestions</li>
+                <li>Analytics insights</li>
+                <li>Workflow automation</li>
+                <li>And much more!</li>
+              </ul>
+              <p>How can I help you today?</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ai-chat-input">
+          <input type="text" id="aiChatInput" placeholder="Ask me anything..." />
+          <button id="aiChatSend" class="btn btn-primary" title="Send AI Chat Message" aria-label="Send AI Chat Message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Compose Message Modal -->
+  <div id="composeModal" class="modal">
+    <div class="modal-content compose-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-edit"></i> Compose Message</h2>
+        <span class="close">&times;</span>
+      </div>
+      
+      <form id="composeForm" class="compose-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Platform</label>
+            <select id="composePlatform" required title="Select messaging platform" aria-label="Select messaging platform">
+              <option value="">Select Platform</option>
+              <option value="gmail">📧 Gmail</option>
+              <option value="telegram">📨 Telegram</option>
+              <option value="whatsapp">💬 WhatsApp</option>
+              <option value="instagram">📷 Instagram</option>
+              <option value="twitter">🐦 X (Twitter)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Message Type</label>
+            <select id="composeType" required title="Select message type" aria-label="Select message type">
+              <option value="text">Text Message</option>
+              <option value="voice">Voice Message</option>
+              <option value="scheduled">Scheduled Message</option>
+              <option value="template">Template Message</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Recipient</label>
+          <div class="recipient-input">
+            <input type="text" id="composeRecipient" placeholder="Email, phone, username..." required>
+            <button type="button" id="aiSuggestRecipient" class="btn btn-ai btn-sm" title="AI Recipient Suggestions">
+              <i class="fas fa-magic"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-group" id="subjectGroup">
+          <label>Subject</label>
+          <input type="text" id="composeSubject" placeholder="Subject (for emails)">
+        </div>
+        
+        <div class="form-group">
+          <label>Message</label>
+          <div class="message-composer">
+            <textarea id="composeMessage" placeholder="Type your message... AI will help with suggestions!" required rows="5"></textarea>
+            <div class="ai-suggestions" id="aiSuggestions">
+              <button type="button" class="ai-suggestion-btn" data-suggestion="formal" title="Apply formal tone" aria-label="Apply formal tone">
+                <i class="fas fa-user-tie"></i> Formal
+              </button>
+              <button type="button" class="ai-suggestion-btn" data-suggestion="casual" title="Apply casual tone" aria-label="Apply casual tone">
+                <i class="fas fa-smile"></i> Casual
+              </button>
+              <button type="button" class="ai-suggestion-btn" data-suggestion="professional" title="Apply professional tone" aria-label="Apply professional tone">
+                <i class="fas fa-briefcase"></i> Professional
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Attachments</label>
+          <div class="attachment-zone" id="attachmentZone">
+            <div class="attachment-drop-zone">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drag & drop files here or click to browse</p>
+              <input type="file" id="composeAttachments" multiple title="Add file attachments" aria-label="Add file attachments">
+            </div>
+            <div class="attachment-preview" id="attachmentPreview"></div>
+          </div>
+        </div>
+
+        <div class="form-group" id="schedulingGroup" style="display: none;">
+          <label>Schedule Message</label>
+          <div class="schedule-inputs">
+            <input type="datetime-local" id="scheduleDateTime">
+            <select id="scheduleTimezone" title="Select timezone for scheduling" aria-label="Select timezone for scheduling">
+              <option value="UTC">UTC</option>
+              <option value="EST">EST</option>
+              <option value="PST">PST</option>
+              <option value="GMT">GMT</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelCompose">Cancel</button>
+          <button type="button" class="btn btn-secondary" id="saveDraft">Save Draft</button>
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Voice Message Modal -->
+  <div id="voiceMessageModal" class="modal">
+    <div class="modal-content voice-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-microphone"></i> Voice Message</h2>
+        <span class="close">&times;</span>
+      </div>
+      
+      <div class="voice-recorder">
+        <div class="voice-visualizer" id="voiceVisualizer">
+          <canvas id="voiceCanvas"></canvas>
+        </div>
+        
+        <div class="voice-controls">
+          <button id="startRecording" class="btn btn-danger btn-lg">
+            <i class="fas fa-microphone"></i> Start Recording
+          </button>
+          <button id="stopRecording" class="btn btn-secondary btn-lg" disabled>
+            <i class="fas fa-stop"></i> Stop Recording
+          </button>
+          <button id="playRecording" class="btn btn-primary btn-lg" disabled>
+            <i class="fas fa-play"></i> Play
+          </button>
+        </div>
+        
+        <div class="recording-info">
+          <span id="recordingTime">00:00</span>
+          <span id="recordingStatus">Ready to record</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Collaboration Modal -->
+  <div id="teamModal" class="modal">
+    <div class="modal-content team-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-users"></i> Team Collaboration</h2>
+        <span class="close">&times;</span>
+      </div>
+      
+      <div class="team-tabs">
+        <button class="tab-btn active" data-tab="members">Team Members</button>
+        <button class="tab-btn" data-tab="permissions">Permissions</button>
+        <button class="tab-btn" data-tab="workflows">Workflows</button>
+        <button class="tab-btn" data-tab="analytics">Team Analytics</button>
+      </div>
+      
+      <div class="tab-content">
+        <div id="membersTab" class="tab-pane active">
+          <div class="team-members-list" id="teamMembersList">
+            <!-- Team members will be populated -->
+          </div>
+          <button id="inviteMemberBtn" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Invite New Member
+          </button>
+        </div>
+        
+        <div id="permissionsTab" class="tab-pane">
+          <div class="permissions-grid" id="permissionsGrid">
+            <!-- Permissions will be populated -->
+          </div>
+        </div>
+        
+        <div id="workflowsTab" class="tab-pane">
+          <div class="workflows-list" id="workflowsList">
+            <!-- Workflows will be populated -->
+          </div>
+          <button id="createWorkflowBtn" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Workflow
+          </button>
+        </div>
+        
+        <div id="analyticsTab" class="tab-pane">
+          <div class="team-analytics" id="teamAnalytics">
+            <!-- Team analytics will be populated -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="loading-spinner hidden">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- AI Processing Indicator -->
+  <div id="aiProcessingIndicator" class="ai-processing-indicator hidden">
+    <div class="ai-spinner">
+      <i class="fas fa-robot"></i>
+    </div>
+    <p>AI is processing your request...</p>
+  </div>
+
+      <script src="demo-data.js"></script>
+    <script src="app.js"></script>
+    <script src="ai-dashboard.js"></script>
+    <link rel="stylesheet" href="kabootar-animation.css" />
+    <script src="kabootar-animation.js"></script>
+  <script>
+    // Initialize AI Dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.AIDashboard) {
+        window.aiDashboard = new AIDashboard();
+      }
+    });
+  </script>
+</body>
+</html>
